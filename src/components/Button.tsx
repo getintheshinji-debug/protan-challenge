@@ -36,11 +36,9 @@ const Button = styled.button<{ $variant?: Variant }>`
   padding: 8px 12px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  cursor: pointer;
   font-size: 14px;
   line-height: 1;
+  cursor: pointer;
   transition: background 0.15s ease, transform 0.05s ease, opacity 0.15s ease;
 
   ${(p) => variants[p.$variant ?? "secondary"]}
