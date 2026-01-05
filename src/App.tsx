@@ -23,7 +23,7 @@ function App() {
   return (
     <StyledApp className="App">
       <StyledAppTop>
-        <h1>Hikaru Challenge</h1>
+        <h1>ぷろたん Challenge</h1>
         <Video />
         <Index />
       </StyledAppTop>

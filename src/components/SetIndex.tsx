@@ -44,7 +44,7 @@ const SetIndex = () => {
       <SetIndexInput value={searchBar} onChange={handleInputURL} />
       {searchIndex && <button onClick={handleSetIndex}>{`Set index to ${searchIndex}`}</button>}
       <CenterText>
-        If you don't know your current index, paste a Hikaru video URL in here
+        If you don't know your current index, paste a ぷろたん video URL in here
         and it will be calculated
       </CenterText>
     </StyledSetIndex>
