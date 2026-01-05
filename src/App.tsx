@@ -6,10 +6,12 @@ import Video from "./components/Video";
 import useStore from "./store";
 import hikaru from "./hikaru.json";
 
+/* ---------------- STYLES ---------------- */
+
 const StyledApp = styled.div`
   height: 100vh;
   background: var(--bg);
-  color: var(--text);
+  color: var(--text),
   position: relative;
   display: flex;
   flex-direction: column;
@@ -25,8 +27,33 @@ const StyledAppTop = styled.div`
   gap: 16px;
 `;
 
+const ShortcutLegend = styled.div<{ $visible: boolean }>`
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+
+  opacity: ${(p) => (p.$visible ? 0.75 : 0)};
+  transition: opacity 0.6s ease;
+
+  @media (max-width: 600px) {
+    display: none;
+  }
+`;
+
+/* ---------------- APP ---------------- */
+
 function App() {
-  /* ---------------- THEME ---------------- */
+  /* -------- THEME -------- */
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
 
   useEffect(() => {
@@ -53,7 +80,7 @@ function App() {
     );
   };
 
-  /* ---------------- VIDEO NAV ---------------- */
+  /* -------- VIDEO NAV -------- */
   const videoIndex = useStore((state) => state.videoIndex);
   const setVideoIndex = useStore((state) => state.setVideoIndex);
 
@@ -69,7 +96,7 @@ function App() {
     jumpTo(next);
   };
 
-  /* ---------------- KEYBOARD SHORTCUTS ---------------- */
+  /* -------- KEYBOARD SHORTCUTS -------- */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -100,6 +127,18 @@ function App() {
     return () => window.removeEventListener("keydown", handler);
   }, [videoIndex, total, theme]);
 
+  /* -------- LEGEND AUTO-HIDE -------- */
+  const [showLegend, setShowLegend] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLegend(false);
+    }, 10000); // 10 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  /* -------- RENDER -------- */
   return (
     <StyledApp className="App">
       {/* Theme toggle button */}
@@ -128,6 +167,11 @@ function App() {
       </StyledAppTop>
 
       <SetIndex />
+
+      {/* Keyboard shortcut legend */}
+      <ShortcutLegend $visible={showLegend}>
+        ← Prev&nbsp;&nbsp;→ Next&nbsp;&nbsp;R Random&nbsp;&nbsp;D Theme
+      </ShortcutLegend>
     </StyledApp>
   );
 }
