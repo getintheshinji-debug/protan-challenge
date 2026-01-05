@@ -1,30 +1,65 @@
-import { useEffect, useState } from "react";
-import styled from "styled-components";
+import { useEffect, useMemo, useState } from "react";
+import styled, { keyframes } from "styled-components";
 import Index from "./components/Index";
 import SetIndex from "./components/SetIndex";
 import Video from "./components/Video";
+import Button from "./components/Button";
 import useStore from "./store";
 import hikaru from "./hikaru.json";
 
-/* ---------------- STYLES ---------------- */
+const fadeUp = keyframes`
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
 
-const StyledApp = styled.div`
-  height: 100vh;
+const AppShell = styled.div`
+  min-height: 100vh;
   background: var(--bg);
-  color: var(--text),
-  position: relative;
+  color: var(--text);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  padding: 22px 16px 64px;
   gap: 16px;
 `;
 
-const StyledAppTop = styled.div`
+const HeaderBar = styled.div`
+  width: 100%;
+  max-width: 980px;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
+`;
+
+const Title = styled.h1`
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+`;
+
+const Subtitle = styled.div`
+  font-size: 13px;
+  opacity: 0.75;
+`;
+
+const Card = styled.div`
+  width: 100%;
+  max-width: 980px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  padding: 18px;
+`;
+
+const Section = styled.div`
+  animation: ${fadeUp} 250ms ease;
+`;
+
+const Divider = styled.div`
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0;
 `;
 
 const ShortcutLegend = styled.div<{ $visible: boolean }>`
@@ -36,143 +71,87 @@ const ShortcutLegend = styled.div<{ $visible: boolean }>`
   border-radius: 10px;
   font-size: 12px;
   background: var(--card);
-  color: var(--text);
   border: 1px solid var(--border);
-  pointer-events: none;
-  user-select: none;
-  white-space: nowrap;
-
   opacity: ${(p) => (p.$visible ? 0.75 : 0)};
   transition: opacity 0.6s ease;
-
-  @media (max-width: 600px) {
-    display: none;
-  }
+  pointer-events: none;
 `;
 
-/* ---------------- APP ---------------- */
-
 function App() {
-  /* -------- THEME -------- */
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+  const [showLegend, setShowLegend] = useState(true);
+
+  const videoIndex = useStore((s) => s.videoIndex);
+  const setVideoIndex = useStore((s) => s.setVideoIndex);
+
+  const total = hikaru.length;
+  const jumpTo = (n: number) =>
+    setVideoIndex(Math.max(1, Math.min(total, n)));
+
+  const progress = useMemo(
+    () => Math.round((videoIndex / total) * 1000) / 10,
+    [videoIndex, total]
+  );
 
   useEffect(() => {
     const saved = localStorage.getItem("theme");
-    if (saved === "light" || saved === "dark" || saved === "system") {
-      setTheme(saved);
-    }
+    if (saved) setTheme(saved as any);
   }, []);
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === "system") {
-      root.removeAttribute("data-theme");
-      localStorage.setItem("theme", "system");
-    } else {
-      root.setAttribute("data-theme", theme);
-      localStorage.setItem("theme", theme);
-    }
+    if (theme === "system") root.removeAttribute("data-theme");
+    else root.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const cycleTheme = () => {
-    setTheme((t) =>
-      t === "system" ? "dark" : t === "dark" ? "light" : "system"
-    );
-  };
-
-  /* -------- VIDEO NAV -------- */
-  const videoIndex = useStore((state) => state.videoIndex);
-  const setVideoIndex = useStore((state) => state.setVideoIndex);
-
-  const total = hikaru.length;
-  const clamp = (n: number) => Math.max(1, Math.min(total, n));
-  const jumpTo = (n: number) => setVideoIndex(clamp(n));
-
-  const randomForward = () => {
-    if (videoIndex >= total) return;
-    const min = videoIndex + 1;
-    const max = total;
-    const next = Math.floor(Math.random() * (max - min + 1)) + min;
-    jumpTo(next);
-  };
-
-  /* -------- KEYBOARD SHORTCUTS -------- */
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      const tag = target?.tagName?.toLowerCase();
-      const isTyping =
-        tag === "input" ||
-        tag === "textarea" ||
-        target?.isContentEditable;
-
-      if (isTyping) return;
-
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        jumpTo(videoIndex - 1);
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        jumpTo(videoIndex + 1);
-      } else if (e.key === "r" || e.key === "R") {
-        e.preventDefault();
-        randomForward();
-      } else if (e.key === "d" || e.key === "D") {
-        e.preventDefault();
-        cycleTheme();
-      }
-    };
-
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [videoIndex, total, theme]);
-
-  /* -------- LEGEND AUTO-HIDE -------- */
-  const [showLegend, setShowLegend] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLegend(false);
-    }, 10000); // 10 seconds
-
+    const timer = setTimeout(() => setShowLegend(false), 10000);
     return () => clearTimeout(timer);
   }, []);
 
-  /* -------- RENDER -------- */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") jumpTo(videoIndex - 1);
+      if (e.key === "ArrowRight") jumpTo(videoIndex + 1);
+      if (e.key.toLowerCase() === "d")
+        setTheme((t) => (t === "dark" ? "light" : "dark"));
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [videoIndex]);
+
   return (
-    <StyledApp className="App">
-      {/* Theme toggle button */}
-      <button
-        onClick={cycleTheme}
-        style={{
-          position: "absolute",
-          top: 12,
-          right: 12,
-          padding: "8px 10px",
-          borderRadius: 8,
-          border: "1px solid var(--border)",
-          background: "var(--card)",
-          color: "var(--text)",
-          cursor: "pointer",
-        }}
-        aria-label="Toggle theme"
-      >
-        Theme: {theme}
-      </button>
+    <AppShell>
+      <HeaderBar>
+        <div>
+          <Title>ぷろたん Challenge</Title>
+          <Subtitle>
+            Progress: {progress}% • {videoIndex}/{total}
+          </Subtitle>
+        </div>
+        <Button $variant="ghost" onClick={() =>
+          setTheme((t) => (t === "dark" ? "light" : "dark"))
+        }>
+          Theme
+        </Button>
+      </HeaderBar>
 
-      <StyledAppTop>
-        <h1>ぷろたん Challenge</h1>
-        <Video />
+      <Card>
+        <Section key={videoIndex}>
+          <Video />
+        </Section>
+
+        <Divider />
         <Index />
-      </StyledAppTop>
+        <Divider />
+        <SetIndex />
+      </Card>
 
-      <SetIndex />
-
-      {/* Keyboard shortcut legend */}
       <ShortcutLegend $visible={showLegend}>
-        ← Prev&nbsp;&nbsp;→ Next&nbsp;&nbsp;R Random&nbsp;&nbsp;D Theme
+        ← Prev&nbsp;&nbsp;→ Next&nbsp;&nbsp;D Theme
       </ShortcutLegend>
-    </StyledApp>
+    </AppShell>
   );
 }
 
