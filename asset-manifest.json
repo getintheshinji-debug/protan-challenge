@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/protan-challenge/static/css/main.7c414532.css",
-    "main.js": "/protan-challenge/static/js/main.eb7b415c.js",
+    "main.css": "/protan-challenge/static/css/main.f54f3a5c.css",
+    "main.js": "/protan-challenge/static/js/main.ce2c10f7.js",
     "index.html": "/protan-challenge/index.html",
-    "main.7c414532.css.map": "/protan-challenge/static/css/main.7c414532.css.map",
-    "main.eb7b415c.js.map": "/protan-challenge/static/js/main.eb7b415c.js.map"
+    "main.f54f3a5c.css.map": "/protan-challenge/static/css/main.f54f3a5c.css.map",
+    "main.ce2c10f7.js.map": "/protan-challenge/static/js/main.ce2c10f7.js.map"
   },
   "entrypoints": [
-    "static/css/main.7c414532.css",
-    "static/js/main.eb7b415c.js"
+    "static/css/main.f54f3a5c.css",
+    "static/js/main.ce2c10f7.js"
   ]
 }
