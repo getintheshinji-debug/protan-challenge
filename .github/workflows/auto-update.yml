@@ -1,0 +1,61 @@
+name: Auto-update Protan videos + Deploy
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Runs daily at 09:30 Japan time (00:30 UTC)
+    - cron: "30 0 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "auto-update-deploy"
+  cancel-in-progress: false
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch latest videos from YouTube (main channel)
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+        run: node scripts/fetchVideos.mjs
+
+      - name: Convert to app format (oldest -> newest, index starts at 1)
+        run: |
+          node -e 'const fs=require("fs"); let v=JSON.parse(fs.readFileSync("public/videos.json","utf8")); v=v.sort((a,b)=>new Date(a.publishedAt)-new Date(b.publishedAt)); const out=v.map((x,i)=>({id:x.videoId,index:i+1,title:x.title,publishedAt:x.publishedAt,channelTitle:x.channelTitle})); fs.writeFileSync("src/hikaru.json", JSON.stringify(out,null,2)); console.log("Wrote", out.length, "videos to src/hikaru.json");'
+
+      - name: Commit updated video list (if changed)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/hikaru.json public/videos.json
+          git diff --cached --quiet || git commit -m "Auto-update videos"
+          git push
+
+      - name: Build site
+        run: npm run build
+
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          publish_branch: gh-pages
+
