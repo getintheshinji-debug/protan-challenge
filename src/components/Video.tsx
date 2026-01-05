@@ -49,8 +49,35 @@ const Video = () => {
     }
   }, [videoIndex]);
 
-  return (
-    <StyledVideo>
+return (
+  <StyledVideo>
+    <div style={{ margin: "12px 0" }}>
+      <div style={{ marginBottom: 4 }}>
+        <strong>Progress:</strong>{" "}
+        {videoIndex} / {hikaru.length} (
+        {Math.round((videoIndex / hikaru.length) * 100)}%)
+      </div>
+
+      <div
+        style={{
+          width: "100%",
+          height: 12,
+          backgroundColor: "#e0e0e0",
+          borderRadius: 6,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            width: `${(videoIndex / hikaru.length) * 100}%`,
+            height: "100%",
+            backgroundColor: "#4caf50",
+            transition: "width 0.3s ease",
+          }}
+        />
+      </div>
+    </div>
+
       {haveValidVideo && (
         <>
           <FlexColumnNoGap>
