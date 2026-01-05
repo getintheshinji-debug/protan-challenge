@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import useStore from "../store";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
+
+import useStore from "../store";
 import hikaru from "../hikaru.json";
+
+const StyledVideo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+`;
 
 const FlexColumnNoGap = styled.div`
   display: flex;
@@ -13,24 +21,51 @@ const FlexColumnNoGap = styled.div`
 
 const ButtonRow = styled.div`
   display: flex;
-  flex-direction: row;
-  gap: 8px;
-`;
-
-const StyledVideo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
 `;
 
 const EmbedContainer = styled.div`
-  &.w100vw { width: 100vw; }
-  &.w480 { width: 480px; }
-  &.w720 { width: 720px; }
-  &.w1280 { width: 1280px; }
-  &.w1920 { width: 1920px; }
-  &.w2560 { width: 2560px; }
+  /* keep embeds centered */
+  margin: 0 auto;
+
+  /* make sure it doesn't overflow the card */
+  max-width: 100%;
+
+  &.w100vw {
+    width: 100%;
+  }
+  &.w480 {
+    width: 480px;
+  }
+  &.w720 {
+    width: 720px;
+  }
+  &.w1280 {
+    width: 1280px;
+  }
+  &.w1920 {
+    width: 1920px;
+  }
+  &.w2560 {
+    width: 2560px;
+  }
+
+  /* safety for small screens / narrow windows */
+  @media (max-width: 900px) {
+    width: 100% !important;
+  }
+`;
+
+const VideoLink = styled.a`
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const Video = () => {
@@ -49,35 +84,8 @@ const Video = () => {
     }
   }, [videoIndex]);
 
-return (
-  <StyledVideo>
-    <div style={{ margin: "12px 0" }}>
-      <div style={{ marginBottom: 4 }}>
-        <strong>Progress:</strong>{" "}
-        {videoIndex} / {hikaru.length} (
-        {Math.round((videoIndex / hikaru.length) * 100)}%)
-      </div>
-
-      <div
-        style={{
-          width: "100%",
-          height: 12,
-          backgroundColor: "#e0e0e0",
-          borderRadius: 6,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            width: `${(videoIndex / hikaru.length) * 100}%`,
-            height: "100%",
-            backgroundColor: "#4caf50",
-            transition: "width 0.3s ease",
-          }}
-        />
-      </div>
-    </div>
-
+  return (
+    <StyledVideo>
       {haveValidVideo && (
         <>
           <FlexColumnNoGap>
@@ -91,17 +99,19 @@ return (
               <button onClick={() => setPlayerClass("w2560")}>2560px</button>
             </ButtonRow>
           </FlexColumnNoGap>
+
           <EmbedContainer className={playerClass}>
             <LiteYouTubeEmbed
-              id={videoId} // Default none, id of the video or playlist
-              poster="hqdefault" // Defines the image size to call on first render as poster image. Possible values are "default","mqdefault",  "hqdefault", "sddefault" and "maxresdefault". Default value for this prop is "hqdefault". Please be aware that "sddefault" and "maxresdefault", high resolution images are not always avaialble for every video. See: https://stackoverflow.com/questions/2068344/how-do-i-get-a-youtube-video-thumbnail-from-the-youtube-api
-              title="YouTube Embed of a ぷろたん Video being watched by a Great Human Being (you)" // a11y, always provide a title for iFrames: https://dequeuniversity.com/tips/provide-iframe-titles Help the web be accessible ;)
-              noCookie={false} //Default false, connect to YouTube via the Privacy-Enhanced Mode using https://www.youtube-nocookie.com
+              id={videoId}
+              poster="hqdefault"
+              title="YouTube Embed of a ぷろたん Video"
+              noCookie={false}
             />
           </EmbedContainer>
-          <a
-            href={`https://youtu.be/${videoId}`}
-          >{`https://youtu.be/${videoId}`}</a>
+
+          <VideoLink href={`https://youtu.be/${videoId}`}>
+            {`https://youtu.be/${videoId}`}
+          </VideoLink>
         </>
       )}
     </StyledVideo>
@@ -109,3 +119,4 @@ return (
 };
 
 export default Video;
+
