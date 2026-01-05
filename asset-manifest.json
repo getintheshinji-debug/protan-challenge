@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/protan-challenge/static/css/main.e9d466a3.css",
+    "main.js": "/protan-challenge/static/js/main.13536044.js",
+    "index.html": "/protan-challenge/index.html",
+    "main.e9d466a3.css.map": "/protan-challenge/static/css/main.e9d466a3.css.map",
+    "main.13536044.js.map": "/protan-challenge/static/js/main.13536044.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e9d466a3.css",
+    "static/js/main.13536044.js"
+  ]
+}
